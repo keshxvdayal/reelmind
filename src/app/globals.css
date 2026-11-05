@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-serif);
+  --color-ink: #120e1c;
+  --color-muted: #6b6478;
+  --color-line: #ece8f2;
+  --color-canvas: #f8f6fb;
+  --color-brand: #7c3aed;
+  --color-brand-soft: #f1eafe;
+  --color-night: #0d0a16;
+}
+
+:root { color-scheme: light; }
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: #e9d5ff; }
+
+.font-display { font-family: var(--font-serif), ui-serif, Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+
+.brand-gradient { background: linear-gradient(135deg, #7c3aed 0%, #db2777 55%, #f97316 100%); }
+.brand-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 55%, #f97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-ring { box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.18), 0 18px 50px -20px rgba(124, 58, 237, 0.45); }
+.soft-shadow { box-shadow: 0 1px 2px rgba(18, 14, 28, 0.04), 0 8px 28px -14px rgba(76, 29, 149, 0.22); }
+.lift { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+.lift:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(18, 14, 28, 0.04), 0 18px 40px -18px rgba(76, 29, 149, 0.35); }
+
+/* Soft glowing background for marketing heroes */
+.hero-glow {
+  background:
+    radial-gradient(60% 50% at 15% 10%, rgba(167, 139, 250, 0.28) 0%, transparent 60%),
+    radial-gradient(50% 45% at 85% 5%, rgba(244, 114, 182, 0.22) 0%, transparent 60%),
+    radial-gradient(45% 40% at 60% 90%, rgba(251, 146, 60, 0.14) 0%, transparent 60%);
+}
+.grid-bg {
+  background-image: linear-gradient(rgba(124, 58, 237, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 58, 237, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(70% 60% at 50% 30%, black 30%, transparent 80%);
+}
+.night { background: radial-gradient(80% 60% at 50% 0%, #2a1650 0%, #0d0a16 70%); }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.rise-2 { animation: rise 0.4s 0.08s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.rise-3 { animation: rise 0.4s 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.float { animation: float 6s ease-in-out infinite; }
+.float-slow { animation: float 8s 1s ease-in-out infinite; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee { animation: marquee 40s linear infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f3f0f7 25%, #e9e4f0 37%, #f3f0f7 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+.prose-answer h1, .prose-answer h2, .prose-answer h3 { font-weight: 600; margin: 1.1rem 0 0.45rem; letter-spacing: -0.01em; }
+.prose-answer h1 { font-size: 1.2rem; }
+.prose-answer h2 { font-size: 1.08rem; }
+.prose-answer h3 { font-size: 0.98rem; }
+.prose-answer p { margin: 0.5rem 0; }
+.prose-answer ul, .prose-answer ol { margin: 0.45rem 0 0.45rem 1.25rem; }
+.prose-answer ul { list-style: disc; }
+.prose-answer ol { list-style: decimal; }
+.prose-answer li { margin: 0.25rem 0; }
+.prose-answer li::marker { color: #a78bfa; }
+.prose-answer strong { font-weight: 600; }
+.prose-answer > :first-child { margin-top: 0; }
+
+.legal h2 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.5rem; }
+.legal p, .legal li { color: rgba(18, 14, 28, 0.75); line-height: 1.75; margin: 0.5rem 0; }
+.legal ul { list-style: disc; padding-left: 1.25rem; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
