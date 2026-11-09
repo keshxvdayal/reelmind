@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { ReminderList } from "@/components/reminder-list";
 import { Badge, PageHeader, SectionTitle } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
-import { prefsOf } from "@/lib/plans";
+import { can, prefsOf } from "@/lib/plans";
 import { readDb } from "@/lib/store";
 import { reminderViews } from "@/lib/view";
 
@@ -17,14 +17,14 @@ export default async function RemindersPage() {
   const due = mine.filter((r) => !r.doneAt && r.dueAt <= now);
   const upcoming = mine.filter((r) => !r.doneAt && r.dueAt > now);
   const done = mine.filter((r) => r.doneAt).reverse().slice(0, 20);
-  const dm = user.plan === "pro" && user.igUserId && prefsOf(user).reminderDms;
+  const dm = can(user, "reminderDms") && user.igUserId && prefsOf(user).reminderDms;
   return (
     <div className="rise space-y-8">
       <PageHeader
         eyebrow="Library"
         title="Reminders"
         subtitle="Open any save and tap “Remind me” to bring it back at the right time."
-        action={dm ? <Badge tone="green">Sent to your Instagram DMs</Badge> : <Badge tone="gray">In-app only{user.plan === "pro" ? "" : " · DMs on Pro"}</Badge>}
+        action={dm ? <Badge tone="green">Sent to your Instagram DMs</Badge> : <Badge tone="gray">In-app only{can(user, "reminderDms") ? "" : " · DMs on Pro"}</Badge>}
       />
       <section>
         <SectionTitle icon={<Bell className="h-4 w-4" />} title="Due now" />

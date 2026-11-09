@@ -7,6 +7,7 @@ import { Bell, Check, FolderHeart, ListPlus, LoaderCircle, Plus } from "lucide-r
 import { NewCollectionButton } from "@/components/collection-forms";
 import { btn, input } from "@/components/ui";
 import { call } from "@/lib/client-api";
+import { LOCALE } from "@/lib/format";
 
 /** Records a view once per page load. */
 export function ViewTracker({ id }: { id: string }) {
@@ -82,7 +83,7 @@ export function RemindMe({ itemId, upcoming }: { itemId: string; upcoming: strin
     <div className="space-y-2">
       <button onClick={() => setOpen((v) => !v)} className={`${btn.ghost} w-full justify-start`}>
         <Bell className="h-4 w-4 text-violet-500" />
-        {upcoming ? <span suppressHydrationWarning>Reminder: {new Date(upcoming).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span> : "Remind me"}
+        {upcoming ? <span suppressHydrationWarning>Reminder: {new Date(upcoming).toLocaleDateString(LOCALE, { day: "numeric", month: "short" })}</span> : "Remind me"}
         {busy && <LoaderCircle className="ml-auto h-4 w-4 animate-spin" />}
       </button>
       {open && (
@@ -93,7 +94,7 @@ export function RemindMe({ itemId, upcoming }: { itemId: string; upcoming: strin
               <button key={p.label} onClick={() => set(p.at)} className="rounded-xl bg-white px-3 py-2 text-left text-sm ring-1 ring-line hover:ring-violet-300">
                 <span className="block font-medium">{p.label}</span>
                 <span className="text-[11px] text-muted" suppressHydrationWarning>
-                  {p.at.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                  {p.at.toLocaleDateString(LOCALE, { weekday: "short", day: "numeric", month: "short" })}
                 </span>
               </button>
             ))}

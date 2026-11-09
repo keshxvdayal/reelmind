@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export type Plan = "free" | "pro";
+export type Plan = "free" | "pro" | "premium";
+export type PaidPlan = Exclude<Plan, "free">;
+
+export const CURRENCIES = ["USD", "EUR", "GBP", "INR"] as const;
+export type Currency = (typeof CURRENCIES)[number];
 
 export type User = {
   id: string;
@@ -17,6 +21,8 @@ export type User = {
   prefs?: UserPrefs;
   billingInterval?: BillingInterval;
   planRenewsAt?: string | null;
+  /** Secret for the Premium calendar feed (/api/calendar/<token>). */
+  calendarToken?: string | null;
 };
 
 export type BillingInterval = "month" | "year";
@@ -167,8 +173,8 @@ export type Payment = {
   userId: string;
   plan: Plan;
   interval: BillingInterval;
-  amount: number; // in paise
-  currency: "INR";
+  amount: number; // minor units (cents, paise…)
+  currency: Currency;
   provider: "razorpay" | "dev";
   ref: string;
   status: "paid" | "created";

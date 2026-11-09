@@ -7,7 +7,7 @@ export const TEMPLATES: Record<PlanTemplate, TemplateInfo> = {
     emoji: "🧳",
     title: "Trip itinerary",
     blurb: "Day-by-day plan from your travel saves",
-    placeholder: "e.g. 4 days in Goa in December, budget ₹20k, love cafés and quiet beaches",
+    placeholder: "e.g. 4 days in Lisbon in May, budget $800, love cafés and quiet beaches",
     examples: ["3 days in Goa, chill vibe", "Weekend getaway from Bangalore", "A week in Himachal on a budget"],
     instructions:
       "Write a trip itinerary. Structure: a one-line overview; then '## Day 1', '## Day 2'… each with morning / afternoon / evening bullets naming specific places from the saves; then '## Where to eat', '## Budget tips', '## Checklist' (bookings, packing). Cite the save after every place or tip that comes from one.",
@@ -46,13 +46,13 @@ export const TEMPLATES: Record<PlanTemplate, TemplateInfo> = {
     placeholder: "e.g. I overthink at night and want a calmer morning and evening routine",
     examples: ["Calm evening routine", "Beat overthinking", "Morning routine for energy"],
     instructions:
-      "Write a gentle self-care routine. Structure: a warm one-line opener; '## Morning', '## During the day', '## Evening' bullet routines; '## When it gets hard' with reminders quoted or paraphrased from the saves; '## Journal prompts'. Cite saves. If they describe a crisis, suggest talking to someone they trust and India's Tele-MANAS helpline 14416.",
+      "Write a gentle self-care routine. Structure: a warm one-line opener; '## Morning', '## During the day', '## Evening' bullet routines; '## When it gets hard' with reminders quoted or paraphrased from the saves; '## Journal prompts'. Cite saves. If they describe a crisis, suggest talking to someone they trust and a local crisis line (for example 988 in the US, 116 123 in the UK and Ireland, Tele-MANAS 14416 in India, or findahelpline.com elsewhere).",
   },
   shopping: {
     emoji: "🛍️",
     title: "Wishlist & gifts",
     blurb: "Products and gift ideas you saved",
-    placeholder: "e.g. birthday gift for my sister under ₹3000, she loves skincare",
+    placeholder: "e.g. birthday gift for my sister under $40, she loves skincare",
     examples: ["Gift for mom", "Skincare wishlist", "Home decor shortlist"],
     instructions:
       "Write a shortlist. Structure: a one-line overview; '## Top picks' with each product or idea, why it fits and the save it came from; '## Also consider'; '## Where to look'. Never invent prices; say when a price wasn't in the save.",

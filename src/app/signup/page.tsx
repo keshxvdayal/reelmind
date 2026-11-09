@@ -9,9 +9,13 @@ export const metadata: Metadata = { title: "Create your account" };
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string }> }) {
   if (await currentUser()) redirect("/app");
   const { plan, interval } = await searchParams;
-  const next = plan === "pro" ? `/app/billing?upgrade=${interval === "month" ? "month" : "year"}` : "/app/connect";
+  const paid = plan === "pro" || plan === "premium" ? plan : null;
+  const next = paid ? `/app/billing?upgrade=${paid}-${interval === "month" ? "month" : "year"}` : "/app/connect";
   return (
-    <AuthShell title="Create your account" subtitle={plan === "pro" ? "Create your account, then pick your Pro plan." : "Free for your first 50 saves. No card needed."}>
+    <AuthShell
+      title="Create your account"
+      subtitle={paid ? `Create your account, then check out ${paid === "premium" ? "Premium" : "Pro"}.` : "Free for your first 50 saves. No card needed."}
+    >
       <AuthForm mode="signup" next={next} />
     </AuthShell>
   );

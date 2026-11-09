@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { apiUser, SESSION_COOKIE, verifyPassword } from "@/lib/auth";
 import { activatePlan } from "@/lib/billing";
+import { getCurrency } from "@/lib/locale";
 import { deleteMedia, mutate } from "@/lib/store";
 
 /**
@@ -14,8 +15,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "Use checkout to change plans." }, { status: 403 });
   }
   const { plan, interval } = (await req.json().catch(() => ({}))) as { plan?: string; interval?: string };
-  if (plan !== "free" && plan !== "pro") return Response.json({ error: "Unknown plan." }, { status: 400 });
-  await activatePlan(user.id, plan, interval === "month" ? "month" : "year", { provider: "dev", ref: "dev-switch" });
+  if (plan !== "free" && plan !== "pro" && plan !== "premium") return Response.json({ error: "Unknown plan." }, { status: 400 });
+  await activatePlan(user.id, plan, interval === "month" ? "month" : "year", { provider: "dev", ref: "dev-switch", currency: await getCurrency() });
   return Response.json({ ok: true });
 }
 

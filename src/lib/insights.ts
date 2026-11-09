@@ -1,5 +1,6 @@
 import { userItems } from "@/lib/library";
 import type { Db, Item } from "@/lib/types";
+import { LOCALE } from "@/lib/format";
 
 export type PlaceSummary = { name: string; count: number; itemIds: string[]; sections: string[]; latest: string };
 
@@ -52,7 +53,7 @@ export function monthlyCounts(items: Item[], months = 12): { month: string; labe
   for (let i = months - 1; i >= 0; i--) {
     const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
     const key = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`;
-    out.push({ month: key, label: m.toLocaleDateString("en-IN", { month: "short" }), count: 0 });
+    out.push({ month: key, label: m.toLocaleDateString(LOCALE, { month: "short" }), count: 0 });
   }
   const idx = new Map(out.map((o, i) => [o.month, i]));
   for (const it of items) {

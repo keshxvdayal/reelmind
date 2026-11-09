@@ -192,7 +192,7 @@ export function Chat({
               }
             }}
             rows={1}
-            placeholder="e.g. that Goa café reel I saved in summer…"
+            placeholder="e.g. that Lisbon café reel I saved in summer…"
             className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-muted/70"
           />
           <button type="submit" disabled={busy || !input.trim()} className="brand-gradient grid h-11 w-11 place-items-center rounded-xl text-white transition disabled:opacity-40" aria-label="Send">

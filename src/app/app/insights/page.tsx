@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarRange, Eye, Ghost, ListChecks, MapPin, Sparkles, TrendingUp } from "lucide-react";
+import { CalendarRange, Crown, Eye, Ghost, ListChecks, MapPin, Sparkles, TrendingUp } from "lucide-react";
 import { MonthBars, ShareBars } from "@/components/charts";
 import { ItemRow } from "@/components/item-card";
-import { Card, Empty, PageHeader, SectionTitle, Stat } from "@/components/ui";
+import { HabitsPanel } from "@/components/habits";
+import { Card, Empty, Locked, PageHeader, SectionTitle, Stat } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { followThrough, heatmap, rhythm, streaks } from "@/lib/habits";
 import { creatorsOf, forgotten, monthlyCounts, placesOf } from "@/lib/insights";
+import { getTimeZone } from "@/lib/locale";
+import { can } from "@/lib/plans";
 import { sectionSummaries, userItems } from "@/lib/library";
 import { readDb } from "@/lib/store";
 import { INTENT_LABEL, type Intent } from "@/lib/types";
@@ -39,6 +43,8 @@ export default async function InsightsPage() {
   const places = placesOf(db, user.id);
   const plans = db.plans.filter((p) => p.userId === user.id).length;
   const trend = lastMonth ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
+  const tz = await getTimeZone();
+  const habits = { cols: heatmap(items, tz), streak: streaks(items, tz), rhythm: rhythm(items, tz), follow: followThrough(todos) };
 
   return (
     <div className="rise space-y-8">
@@ -49,6 +55,21 @@ export default async function InsightsPage() {
         <Stat label="Opened again" value={`${Math.round((opened / items.length) * 100)}%`} hint={`${opened} of ${items.length} saves`} icon={<Eye className="h-4 w-4" />} />
         <Stat label="Turned into action" value={todos.filter((t) => t.done).length} hint={`tried · ${plans} plans made`} icon={<ListChecks className="h-4 w-4" />} />
       </div>
+
+      <section>
+        <SectionTitle
+          icon={<Crown className="h-4 w-4 text-amber-500" />}
+          title="Habits"
+          hint="Streaks, rhythm and follow-through"
+        />
+        {can(user, "advancedInsights") ? (
+          <HabitsPanel data={habits} />
+        ) : (
+          <Locked plan="premium" title="See your saving habits" body="Premium shows your streaks, a daily heatmap, when you save most, and how much you actually follow through.">
+            <HabitsPanel data={habits} />
+          </Locked>
+        )}
+      </section>
 
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <Card className="p-6">

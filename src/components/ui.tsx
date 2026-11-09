@@ -130,3 +130,43 @@ export function Progress({ value, max }: { value: number; max: number }) {
     </div>
   );
 }
+
+/** Small pill naming a plan: neutral for Free, brand for Pro, gold for Premium. */
+export function PlanPill({ plan, className = "" }: { plan: "free" | "pro" | "premium"; className?: string }) {
+  const styles = {
+    free: "bg-canvas text-muted ring-1 ring-line",
+    pro: "brand-gradient text-white",
+    premium: "premium-gradient text-[#3b2304]",
+  };
+  return <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${styles[plan]} ${className}`}>{plan}</span>;
+}
+
+/**
+ * Wraps a feature preview for people on a lower plan: the content shows
+ * blurred behind a card that says what unlocks it.
+ */
+export function Locked({ plan, title, body, children, cta = "/app/billing" }: { plan: "pro" | "premium"; title: string; body: string; children: React.ReactNode; cta?: string }) {
+  const premium = plan === "premium";
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      <div className="blur-lock opacity-70" aria-hidden>
+        {children}
+      </div>
+      <div className="absolute inset-0 grid place-items-center bg-gradient-to-b from-white/30 via-white/60 to-white/80 p-6">
+        <div className="max-w-sm rounded-2xl border border-line bg-white p-6 text-center shadow-xl shadow-violet-900/10">
+          <span className={`mx-auto grid h-11 w-11 place-items-center rounded-2xl ${premium ? "premium-gradient text-[#3b2304]" : "brand-gradient text-white"}`}>
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="11" width="16" height="10" rx="2" />
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+            </svg>
+          </span>
+          <p className="mt-3 font-semibold">{title}</p>
+          <p className="mt-1 text-sm text-muted">{body}</p>
+          <Link href={cta} className={`${premium ? "premium-gradient text-[#3b2304] shadow-amber-500/25" : "brand-gradient text-white shadow-fuchsia-500/20"} mt-4 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition hover:opacity-95`}>
+            Unlock with {premium ? "Premium" : "Pro"}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

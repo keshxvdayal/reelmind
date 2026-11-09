@@ -24,7 +24,7 @@ const GUIDES = [
   {
     icon: CalendarRange,
     t: "Make a plan",
-    steps: ["Open Planner and pick a template, e.g. Trip.", "Say what you want: “4 days in Goa in December, budget ₹20k”.", "ReelMind builds it from your saves. It's kept under Planner."],
+    steps: ["Open Planner and pick a template, e.g. Trip.", "Say what you want: “4 days in Lisbon in May, budget $800”.", "ReelMind builds it from your saves. It's kept under Planner."],
   },
   {
     icon: FolderHeart,
@@ -39,7 +39,7 @@ const GUIDES = [
   {
     icon: CreditCard,
     t: "Plans & billing",
-    steps: ["Billing shows your usage and plan.", "Upgrade with UPI, cards or net banking.", "Pro is prepaid and never auto-renews. Renew from Billing."],
+    steps: ["Billing shows your usage and plan.", "Upgrade with any major card (UPI and net banking in India). Pick your currency: USD, EUR, GBP or INR.", "Pro and Premium are prepaid and never auto-renew. Renew or switch from Billing."],
   },
 ];
 

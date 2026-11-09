@@ -1,6 +1,6 @@
 import { expirePlans } from "@/lib/billing";
 import { appUrl, reply } from "@/lib/ingest";
-import { prefsOf } from "@/lib/plans";
+import { can, prefsOf } from "@/lib/plans";
 import { mutate, readDb } from "@/lib/store";
 
 /**
@@ -15,7 +15,7 @@ export async function sweep() {
   for (const r of due) {
     const user = db.users.find((u) => u.id === r.userId);
     const item = db.items.find((i) => i.id === r.itemId);
-    const wantsDm = user && item && user.plan === "pro" && user.igUserId && prefsOf(user).reminderDms;
+    const wantsDm = user && item && can(user, "reminderDms") && user.igUserId && prefsOf(user).reminderDms;
     if (wantsDm) {
       const title = item.analysis?.title ?? "your save";
       await reply(user.igUserId!, `⏰ Reminder: ${title}${r.note ? `\n${r.note}` : ""}\n${appUrl()}/app/saves/${item.id}`).catch((err) => console.error("[reminders]", err));

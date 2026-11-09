@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DangerZone, ExportButtons, PasswordForm, PrefsForm, ProfileForm } from "@/components/settings-forms";
+import { CalendarSync, DangerZone, ExportButtons, PasswordForm, PrefsForm, ProfileForm } from "@/components/settings-forms";
 import { Badge, btn, Card, PageHeader } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { fmtDate } from "@/lib/format";
-import { prefsOf } from "@/lib/plans";
+import { appUrl } from "@/lib/ingest";
+import { can, prefsOf } from "@/lib/plans";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -22,7 +23,7 @@ function Block({ title, hint, children }: { title: string; hint: string; childre
 
 export default async function SettingsPage() {
   const user = await requireUser();
-  const pro = user.plan === "pro";
+  const pro = can(user, "dmAnswers");
   return (
     <div className="rise space-y-5">
       <PageHeader eyebrow="Account" title="Settings" subtitle={`Member since ${fmtDate(user.createdAt)}`} />
@@ -44,7 +45,10 @@ export default async function SettingsPage() {
         <PrefsForm prefs={prefsOf(user)} pro={pro} />
       </Block>
       <Block title="Export your data" hint="Every save with its summary, tags, places and notes.">
-        <ExportButtons pro={pro} />
+        <ExportButtons pro={can(user, "export")} premium={can(user, "markdownExport")} />
+      </Block>
+      <Block title="Calendar sync" hint="Your reminders in Google Calendar, Apple Calendar or Outlook, kept up to date.">
+        <CalendarSync premium={can(user, "calendar")} token={user.calendarToken ?? null} origin={appUrl()} />
       </Block>
       <DangerZone />
     </div>

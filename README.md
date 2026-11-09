@@ -23,7 +23,7 @@ Without an AI key the app still runs: new saves are sorted by keyword rules, and
 
 ## Pages
 
-**Marketing site:** `/` landing, `/features`, `/pricing` (monthly/yearly toggle, comparison table), `/use-cases`, `/about`, `/contact` (form stored in the DB), `/help`, `/privacy`, `/terms`, plus `/login` and `/signup` (`?plan=pro&interval=year` goes straight to checkout).
+**Marketing site:** `/` landing, `/features`, `/pricing` (Free/Pro/Premium, monthly/yearly toggle, currency picker, comparison table), `/use-cases`, `/about`, `/contact` (form stored in the DB), `/help`, `/privacy`, `/terms`, plus `/login` and `/signup` (`?plan=pro&interval=year` goes straight to checkout).
 
 **Dashboard (`/app`)**
 
@@ -41,14 +41,26 @@ Without an AI key the app still runs: new saves are sorted by keyword rules, and
 | `/app/insights` | Saves per month, top sections, why you save, favourite creators, forgotten saves |
 | `/app/saves/[id]` | One save: summary, key points, action items → try list, places, remind me, collections, related saves, note, move, re-analyse, delete |
 | `/app/connect` | Link code, connection status, DM simulator |
-| `/app/billing` | Plan, usage meters, Razorpay checkout, payment history |
+| `/app/digest` | Premium weekly digest: headline, highlights, new places, next 7 days, worth revisiting |
+| `/app/billing` | Plan, usage, Pro/Premium checkout in USD/EUR/GBP/INR, payment history |
 | `/app/settings` | Profile, password, DM preferences, export (CSV/JSON), delete account |
 
 Press **⌘K / Ctrl+K** anywhere in the dashboard to search saves, sections and pages, or to ask the AI.
 
-## Plans
+## Plans & pricing
 
-Free: 50 saves, 10 questions/day, 3 collections, 3 AI plans/month. Pro: ₹299/month or ₹2,499/year, unlimited everything, DM answers, DM reminders and export. Pro is prepaid (no auto-renewal); a background loop (`src/instrumentation.ts` → `src/lib/reminders.ts`) expires ended periods and sends due reminders every minute. Limits live in `src/lib/plans.ts`.
+| | Free | Pro | Premium |
+|---|---|---|---|
+| USD / EUR | $0 | $4.99/mo · $39/yr | $9.99/mo · $79/yr |
+| GBP | £0 | £3.99/mo · £34/yr | £8.99/mo · £69/yr |
+| INR | ₹0 | ₹299/mo · ₹2,499/yr | ₹599/mo · ₹4,999/yr |
+
+Free: 50 saves, 10 questions/day, 3 collections, 3 AI plans/month. **Pro**: unlimited everything, DM answers, DM reminders, CSV/JSON export. **Premium**: everything in Pro plus the weekly digest (`/app/digest`), habits insights (heatmap, streaks, rhythm, follow-through), calendar sync (secret iCal feed at `/api/calendar/<token>`) and Markdown export.
+
+- Prices, plans and feature gates live in `src/lib/plans.ts` (`PRICES`, `PLANS`, `FEATURE_PLAN`, `can(user, feature)`).
+- Currency is picked from the `rm_currency` cookie (the currency switcher), else the CDN country header (`x-vercel-ip-country` / `cf-ipcountry`), else `Accept-Language`, else USD (`src/lib/locale.ts`).
+- Paid plans are prepaid (no auto-renewal). Renewing the same plan extends it; switching plan carries unused time over, scaled by the price ratio. A background loop (`src/instrumentation.ts` → `src/lib/reminders.ts`) expires ended periods and sends due reminders every minute.
+- Charging in USD/EUR/GBP needs **International payments** enabled on the Razorpay account.
 
 ## How it works
 

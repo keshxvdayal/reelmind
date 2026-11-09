@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Menu } from "lucide-react";
+import { CurrencySwitcher } from "@/components/currency-switcher";
 import { btn, Logo } from "@/components/ui";
+import type { Currency } from "@/lib/types";
 
 const NAV = [
   { href: "/features", label: "Features" },
@@ -60,7 +62,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ currency }: { currency: Currency }) {
   const cols = [
     { title: "Product", links: [["Features", "/features"], ["Pricing", "/pricing"], ["Use cases", "/use-cases"], ["Start free", "/signup"]] },
     { title: "Company", links: [["About", "/about"], ["Contact", "/contact"], ["Help centre", "/help"]] },
@@ -71,7 +73,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="space-y-3">
           <Logo />
-          <p className="max-w-xs text-sm leading-relaxed text-muted">The second brain for everything you save on Instagram. Made in India for people who save too much and remember too little.</p>
+          <p className="max-w-xs text-sm leading-relaxed text-muted">The second brain for everything you save on Instagram. Made for people everywhere who save too much and remember too little.</p>
         </div>
         {cols.map((c) => (
           <div key={c.title}>
@@ -90,7 +92,10 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-5 text-xs text-muted">
-          <p>© {new Date().getFullYear()} ReelMind. All rights reserved.</p>
+          <div className="flex items-center gap-3">
+            <p>© {new Date().getFullYear()} ReelMind. All rights reserved.</p>
+            <CurrencySwitcher value={currency} />
+          </div>
           <p>Not affiliated with, endorsed or sponsored by Instagram or Meta.</p>
         </div>
       </div>
@@ -126,7 +131,7 @@ export function CtaBand() {
         <h2 className="relative text-3xl font-semibold tracking-tight sm:text-5xl">
           Stop saving reels <span className="font-display italic text-fuchsia-300">into the void.</span>
         </h2>
-        <p className="relative mx-auto mt-4 max-w-xl text-white/70">Connect Instagram in under a minute. Your first 50 saves are free, forever.</p>
+        <p className="relative mx-auto mt-4 max-w-xl text-white/70">Connect Instagram in under a minute. Your first 50 saves are free, forever. Works in any language.</p>
         <div className="relative mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/signup" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition hover:bg-violet-50">
             Create free account <ArrowRight className="h-4 w-4" />
@@ -160,8 +165,8 @@ export const FAQ: [string, string][] = [
   ["Do I need to give you my Instagram password?", "Never. You connect by sending a one-time code to our bot account in a DM. We only see what you choose to share with the bot."],
   ["How do I save a reel?", "On any reel or post, tap the paper-plane Share button and send it to our bot, exactly like sending it to a friend. Add a note in the message if you want. It shows up in your dashboard, sorted, within seconds."],
   ["What does the AI actually do with a save?", "It reads the caption, creator and image, then writes a title, a summary, the key points (steps, places, ingredients, exercises), action items and search tags, and files it into a section of your life like Travel or Fitness."],
-  ["Can I ask about something I saved months ago?", "Yes, that is the whole point. Ask things like “that café reel I saved in summer” or “plan a 3-day Goa trip from my saves”. ReelMind searches everything you saved and answers with links to the exact saves."],
-  ["Does it work with Hinglish captions?", "Yes. Captions in Hindi, Hinglish and most other languages are understood, and you can ask questions in Hinglish too."],
-  ["What happens when my Pro period ends?", "You keep everything you saved. Pro never auto-renews; if you do not renew, you go back to the Free plan limits for new saves and questions, and nothing is deleted."],
+  ["Can I ask about something I saved months ago?", "Yes, that is the whole point. Ask things like “that café reel I saved in summer” or “plan a 3-day Lisbon trip from my saves”. ReelMind searches everything you saved and answers with links to the exact saves."],
+  ["Does it work in my language?", "Yes. Captions in Spanish, French, German, Portuguese, Hindi, Hinglish, Japanese and 40+ other languages are understood, and you can ask questions in your own language too."],
+  ["What happens when my paid plan ends?", "You keep everything you saved. Pro and Premium never auto-renew; if you do not renew, you go back to the Free plan limits for new saves and questions, and nothing is deleted."],
   ["Can I export my data?", "Yes. Settings → Export gives you all your saves as CSV or JSON at any time."],
 ];

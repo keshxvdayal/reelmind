@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Bell, CalendarRange, Check, Clock, ListChecks, Send, Sparkles } from "lucide-react";
+import { ArrowRight, Bell, CalendarRange, Check, Clock, Crown, Flame, ListChecks, MapPin, Newspaper, Send, Sparkles, Target } from "lucide-react";
 import { AddSave } from "@/components/add-save";
 import { AskBar, PromptChips } from "@/components/ask-bar";
 import { ItemCard, ItemGrid } from "@/components/item-card";
 import { btn, Card, SectionTitle, tileStyle } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { weeklyDigest } from "@/lib/digest";
 import { daysAgoIso, timeAgo } from "@/lib/format";
-import { rediscover } from "@/lib/insights";
+import { followThrough, streaks } from "@/lib/habits";
+import { getTimeZone } from "@/lib/locale";
+import { placesOf, rediscover } from "@/lib/insights";
 import { sectionSummaries, userItems } from "@/lib/library";
 import { TEMPLATES } from "@/lib/planner";
-import { prefsOf } from "@/lib/plans";
+import { can, prefsOf } from "@/lib/plans";
 import { readDb } from "@/lib/store";
 import { toView } from "@/lib/view";
 
 export const metadata: Metadata = { title: "Home" };
 
-function greeting() {
-  const h = Number(new Date().toLocaleString("en-IN", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" }));
+function greeting(timeZone: string) {
+  const h = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone }).format(new Date())) % 24;
   return h < 5 ? "Up late" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
 }
 
@@ -43,6 +46,12 @@ export default async function Home() {
   const doneSteps = steps.filter((s) => s.done).length;
   const memories = prefsOf(user).rediscover ? rediscover(views.filter((v) => v.status === "ready"), 4) : [];
   const topSections = sections.slice(0, 3).map((s) => s.name);
+  const tz = await getTimeZone();
+  const streak = streaks(items, tz);
+  const follow = followThrough(db.todos.filter((t) => t.userId === user.id));
+  const placeCount = placesOf(db, user.id).length;
+  const week = weeklyDigest(db, user.id);
+  const premium = can(user, "digest");
 
   return (
     <div className="space-y-10">
@@ -52,7 +61,7 @@ export default async function Home() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-muted">
-                {greeting()}, {firstName} 👋
+                {greeting(tz)}, {firstName} 👋
               </p>
               <h1 className="mt-1 text-[30px] font-semibold leading-tight tracking-tight sm:text-4xl">
                 What are you <span className="font-display italic brand-text">looking for?</span>
@@ -77,6 +86,46 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {items.length > 0 && (
+        <div className="rise-2 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[
+            { icon: Flame, label: "Save streak", value: `${streak.current} day${streak.current === 1 ? "" : "s"}`, hint: `Best: ${streak.longest} day${streak.longest === 1 ? "" : "s"}`, tone: "from-orange-100 to-amber-50 text-orange-600" },
+            { icon: Sparkles, label: "This week", value: week.saves.length, hint: week.previousCount ? `${week.previousCount} the week before` : "new saves", tone: "from-violet-100 to-fuchsia-50 text-violet-600" },
+            { icon: MapPin, label: "Places", value: placeCount, hint: "across your saves", tone: "from-sky-100 to-cyan-50 text-sky-600" },
+            { icon: Target, label: "Follow-through", value: `${follow.rate}%`, hint: `${follow.done} of ${follow.total} tried`, tone: "from-emerald-100 to-teal-50 text-emerald-600" },
+          ].map(({ icon: Icon, label, value, hint, tone }) => (
+            <div key={label} className="soft-shadow flex items-center gap-3.5 rounded-2xl border border-line bg-white p-4">
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${tone}`}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-muted">{label}</p>
+                <p className="text-xl font-semibold leading-tight tracking-tight tabular-nums">{value}</p>
+                <p className="truncate text-[11px] text-muted">{hint}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {items.length > 0 && (
+        <Link href="/app/digest" className="premium-card group relative flex flex-wrap items-center gap-5 overflow-hidden rounded-3xl p-6 transition hover:brightness-110">
+          <div className="grid-bg absolute inset-0 opacity-20" />
+          <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-amber-300">
+            <Newspaper className="h-6 w-6" />
+          </span>
+          <div className="relative min-w-0 flex-1">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-200">
+              Your weekly digest {!premium && <Crown className="h-3.5 w-3.5" />}
+            </p>
+            <p className="mt-1 text-[15px] leading-snug text-white/90 sm:text-base">{premium ? week.headline : "See your week summed up: highlights, new places, what's coming up and what to revisit."}</p>
+          </div>
+          <span className="relative inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15">
+            {premium ? "Read it" : "Unlock with Premium"} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </span>
+        </Link>
+      )}
 
       {doneSteps < steps.length && (
         <Card className="rise-2 p-6">

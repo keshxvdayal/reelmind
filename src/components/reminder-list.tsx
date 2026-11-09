@@ -8,8 +8,9 @@ import { Card } from "@/components/ui";
 import { call } from "@/lib/client-api";
 
 import type { ReminderView } from "@/lib/view";
+import { LOCALE } from "@/lib/format";
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+const fmt = (iso: string) => new Date(iso).toLocaleString(LOCALE, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
 export function ReminderList({ reminders, empty }: { reminders: ReminderView[]; empty: string }) {
   const router = useRouter();

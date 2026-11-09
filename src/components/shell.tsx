@@ -7,6 +7,7 @@ import {
   Bell,
   CalendarRange,
   ChevronDown,
+  Crown,
   CreditCard,
   FolderHeart,
   FolderTree,
@@ -19,6 +20,7 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Newspaper,
   Search,
   Send,
   Settings,
@@ -28,12 +30,12 @@ import {
 } from "lucide-react";
 import { AddSave } from "@/components/add-save";
 import { CommandPalette } from "@/components/command-palette";
-import { Logo, Progress } from "@/components/ui";
+import { Logo, PlanPill, Progress } from "@/components/ui";
 
 type NavSection = { slug: string; name: string; emoji: string; count: number };
 
 export type ShellProps = {
-  user: { name: string; email: string; plan: "free" | "pro" };
+  user: { name: string; email: string; plan: "free" | "pro" | "premium" };
   sections: NavSection[];
   linked: boolean;
   pending: number;
@@ -53,6 +55,7 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
   const [palette, setPalette] = useState(false);
   const [showSections, setShowSections] = useState(true);
   useLiveRefresh(pending, total);
+  useTimeZoneCookie();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -65,12 +68,13 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const groups: { title?: string; items: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }[] }[] = [
+  const groups: { title?: string; items: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number; premium?: boolean }[] }[] = [
     {
       items: [
         { href: "/app", label: "Home", icon: House },
         { href: "/app/ask", label: "Ask ReelMind", icon: MessageCircle },
         { href: "/app/planner", label: "Planner", icon: CalendarRange },
+        { href: "/app/digest", label: "Weekly digest", icon: Newspaper, premium: user.plan !== "premium" },
       ],
     },
     {
@@ -114,10 +118,11 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
         <div key={i}>
           {g.title && <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted/80">{g.title}</p>}
           <div className="space-y-0.5">
-            {g.items.map(({ href, label, icon: Icon, badge }) => (
+            {g.items.map(({ href, label, icon: Icon, badge, premium }) => (
               <Link key={href} href={href} className={link(isActive(href))}>
                 <Icon className={`h-4 w-4 ${isActive(href) ? "text-brand" : ""}`} /> {label}
                 {badge ? <span className="ml-auto rounded-full bg-violet-100 px-1.5 text-[11px] font-semibold text-violet-700">{badge}</span> : null}
+                {premium ? <Crown className="ml-auto h-3.5 w-3.5 text-amber-500" aria-label="Premium" /> : null}
               </Link>
             ))}
           </div>
@@ -149,6 +154,14 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
       </div>
 
       <div className="mt-auto space-y-3">
+        {user.plan === "pro" && (
+          <Link href="/app/billing" className="premium-card group block overflow-hidden rounded-2xl p-3.5 transition hover:brightness-110">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-200">
+              <Crown className="h-3.5 w-3.5" /> Go Premium
+            </p>
+            <p className="mt-1 text-[11.5px] leading-snug text-white/65">Weekly digest, habit streaks & calendar sync.</p>
+          </Link>
+        )}
         {user.plan === "free" && saveLimit && (
           <Link href="/app/billing" className="block rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-3.5">
             <div className="mb-2 flex items-center justify-between text-xs">
@@ -170,7 +183,7 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
           </Link>
           <Link href="/app/billing" className={link(isActive("/app/billing"))}>
             <CreditCard className="h-4 w-4" /> Billing
-            <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${user.plan === "pro" ? "brand-gradient text-white" : "bg-canvas text-muted ring-1 ring-line"}`}>{user.plan}</span>
+            <PlanPill plan={user.plan} className="ml-auto" />
           </Link>
           <Link href="/app/settings" className={link(isActive("/app/settings"))}>
             <Settings className="h-4 w-4" /> Settings
@@ -180,7 +193,7 @@ export function Shell({ user, sections, linked, pending, total, saveLimit, badge
           </Link>
         </div>
         <div className="flex items-center gap-2.5 rounded-xl px-2 py-1.5">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xs font-semibold text-white">
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xs font-semibold text-white ${user.plan === "premium" ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-canvas" : ""}`}>
             {user.name.slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1 leading-tight">
@@ -268,4 +281,17 @@ function useLiveRefresh(pending: number, total: number) {
     }, pending > 0 ? 2500 : 15000);
     return () => clearInterval(t);
   }, [pending, total, router]);
+}
+
+/** Tell the server the browser's time zone, so greetings and day boundaries match the user's clock. */
+function useTimeZoneCookie() {
+  const router = useRouter();
+  useEffect(() => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz) return;
+    const current = document.cookie.match(/(?:^|; )rm_tz=([^;]*)/)?.[1];
+    if (current && decodeURIComponent(current) === tz) return;
+    document.cookie = `rm_tz=${encodeURIComponent(tz)}; path=/; max-age=31536000; samesite=lax`;
+    router.refresh();
+  }, [router]);
 }

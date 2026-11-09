@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Check, Download, LoaderCircle, Lock } from "lucide-react";
+import { CalendarPlus, Check, Copy, Crown, Download, FileText, LoaderCircle, Lock, RefreshCcw } from "lucide-react";
 import { btn, Card, input } from "@/components/ui";
 import { call } from "@/lib/client-api";
 import type { UserPrefs } from "@/lib/types";
@@ -142,7 +142,7 @@ export function PrefsForm({ prefs, pro }: { prefs: UserPrefs; pro: boolean }) {
   );
 }
 
-export function ExportButtons({ pro }: { pro: boolean }) {
+export function ExportButtons({ pro, premium }: { pro: boolean; premium: boolean }) {
   if (!pro)
     return (
       <Link href="/app/billing" className={btn.ghost}>
@@ -157,6 +157,89 @@ export function ExportButtons({ pro }: { pro: boolean }) {
       <a href="/api/export?format=json" className={btn.ghost}>
         <Download className="h-4 w-4" /> Download JSON
       </a>
+      {premium ? (
+        <a href="/api/export?format=md" className={btn.ghost}>
+          <FileText className="h-4 w-4" /> Markdown (Notion, Obsidian)
+        </a>
+      ) : (
+        <Link href="/app/billing" className={btn.ghost}>
+          <Crown className="h-4 w-4 text-amber-500" /> Markdown export · Premium
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/** Secret iCalendar URL for Google / Apple / Outlook. Premium. */
+export function CalendarSync({ premium, token: t0, origin }: { premium: boolean; token: string | null; origin: string }) {
+  const router = useRouter();
+  const [token, setToken] = useState(t0);
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!premium)
+    return (
+      <Link href="/app/billing" className={btn.ghost}>
+        <Crown className="h-4 w-4 text-amber-500" /> Calendar sync is part of Premium
+      </Link>
+    );
+  const url = token ? `${origin}/api/calendar/${token}` : null;
+  async function make() {
+    setBusy(true);
+    setError(null);
+    const r = await call<{ token: string }>("/api/calendar", "POST");
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    setToken(r.data.token);
+    router.refresh();
+  }
+  async function off() {
+    setBusy(true);
+    await call("/api/calendar", "DELETE");
+    setBusy(false);
+    setToken(null);
+    router.refresh();
+  }
+  if (!url)
+    return (
+      <div className="space-y-2">
+        <button onClick={make} disabled={busy} className={btn.primary}>
+          {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <CalendarPlus className="h-4 w-4" />} Create calendar link
+        </button>
+        {error && <p className="text-sm text-rose-600">{error}</p>}
+      </div>
+    );
+  const webcal = url.replace(/^https?:/, "webcal:");
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <input readOnly value={url} className={`${input} font-mono text-xs`} onFocus={(e) => e.currentTarget.select()} aria-label="Calendar feed URL" />
+        <button
+          onClick={async () => {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          className={`${btn.ghost} shrink-0`}
+        >
+          {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />} {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`} target="_blank" rel="noreferrer" className={btn.ghost}>
+          Add to Google Calendar
+        </a>
+        <a href={webcal} className={btn.ghost}>
+          Apple / Outlook
+        </a>
+        <button onClick={make} disabled={busy} className={btn.subtle} title="Make a new link; the old one stops working">
+          <RefreshCcw className="h-3.5 w-3.5" /> New link
+        </button>
+        <button onClick={off} disabled={busy} className={`${btn.subtle} hover:text-rose-600`}>
+          Turn off
+        </button>
+      </div>
+      <p className="text-xs text-muted">Anyone with this link can see your reminders. Calendars refresh it every few hours.</p>
     </div>
   );
 }

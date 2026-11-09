@@ -3,7 +3,7 @@ import { aiEnabled } from "@/lib/ai/client";
 import { classify, classifyByKeywords, ClassifyError } from "@/lib/ai/classify";
 import { downloadImage, fetchUsername, LINK_CODE_RE, sendDm, type Inbound } from "@/lib/instagram";
 import { pruneEmptySections, upsertSection } from "@/lib/library";
-import { canSave, PLANS, prefsOf, takeAsk } from "@/lib/plans";
+import { can, canSave, PLANS, prefsOf, takeAsk } from "@/lib/plans";
 import { logWebhook, mutate, newId, readDb, readMedia, saveMedia } from "@/lib/store";
 import type { Item, ItemKind, ItemSource, User } from "@/lib/types";
 
@@ -135,7 +135,7 @@ async function handleShare(ev: Extract<Inbound, { type: "share" }>) {
 
   if (result.kind === "duplicate") return;
   if (result.kind === "limit") {
-    await reply(ev.senderId, `Your free plan is full (${PLANS.free.saveLimit} saves). Upgrade to Pro to keep saving: ${appUrl()}/app/account`);
+    await reply(ev.senderId, `Your free plan is full (${PLANS.free.saveLimit} saves). Upgrade to Pro to keep saving: ${appUrl()}/app/billing`);
     return;
   }
 
@@ -211,7 +211,7 @@ async function handleText(ev: Extract<Inbound, { type: "text" }>) {
   if (/^\s*(help|menu|\?)\s*$/i.test(ev.text)) {
     await reply(
       ev.senderId,
-      `Here's what I can do 👇\n• Share any reel or post with me to save it\n• Add a note in the same message to remember why\n• Ask me things like "what cafés did I save in Goa?"${user.plan === "pro" ? "" : " (Pro)"}\nYour dashboard: ${appUrl()}/app`,
+      `Here's what I can do 👇\n• Share any reel or post with me to save it\n• Add a note in the same message to remember why\n• Ask me things like "what cafés did I save in Goa?"${can(user, "dmAnswers") ? "" : " (Pro)"}\nYour dashboard: ${appUrl()}/app`,
     );
     return;
   }
@@ -219,7 +219,7 @@ async function handleText(ev: Extract<Inbound, { type: "text" }>) {
     await reply(ev.senderId, `I can't answer questions right now, but all your saves are on your dashboard: ${appUrl()}/app`);
     return;
   }
-  if (user.plan !== "pro") {
+  if (!can(user, "dmAnswers")) {
     await reply(ev.senderId, `Asking me in DMs is part of ReelMind Pro. You can ask on your dashboard for free: ${appUrl()}/app/ask?q=${encodeURIComponent(ev.text.slice(0, 200))}`);
     return;
   }
@@ -228,7 +228,7 @@ async function handleText(ev: Extract<Inbound, { type: "text" }>) {
     return;
   }
   if (!takeAsk(user)) {
-    await reply(ev.senderId, `You've used today's free questions. Upgrade to Pro for unlimited: ${appUrl()}/app/account`);
+    await reply(ev.senderId, `You've used today's free questions. Upgrade to Pro for unlimited: ${appUrl()}/app/billing`);
     return;
   }
   const { text } = await askToText({ userId: user.id, history: [], question: ev.text, channel: "dm" });

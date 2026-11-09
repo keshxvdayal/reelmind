@@ -7,7 +7,7 @@ export const USE_CASES: UseCase[] = [
     title: "Plan trips from reels",
     short: "Every hidden beach, café and itinerary you saved, turned into a real plan.",
     body: "Travel reels are the most saved and the least used. ReelMind pulls out every place, price and tip, groups them by destination, and builds a day-by-day itinerary from your own saves when you're ready to go.",
-    asks: ["Plan 3 days in Goa from my saves", "Which cafés did I save in Bangalore?", "Budget trips under ₹10k I saved"],
+    asks: ["Plan 3 days in Lisbon from my saves", "Which cafés did I save in Bangalore?", "Budget trips under $500 I saved"],
     gets: ["Day-by-day itinerary", "Places list with map links", "Packing and booking checklist"],
   },
   {

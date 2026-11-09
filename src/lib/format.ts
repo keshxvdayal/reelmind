@@ -1,5 +1,8 @@
 const DAY = 86400_000;
 
+/** Day-month-year reads unambiguously everywhere ("9 Nov 2026"). */
+export const LOCALE = "en-GB";
+
 export function timeAgo(iso: string, now = Date.now()): string {
   const diff = now - new Date(iso).getTime();
   if (diff < 60_000) return "just now";
@@ -14,7 +17,7 @@ export function timeAgo(iso: string, now = Date.now()): string {
 }
 
 export function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString(LOCALE, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function plural(n: number, word: string) {

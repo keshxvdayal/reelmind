@@ -31,7 +31,7 @@ export default function AboutPage() {
           {[
             ["Useful over clever", "Every feature has to turn saves into something you do."],
             ["Private by default", "Your library is yours. No ads, no selling data, ever."],
-            ["Made for India", "Hinglish captions, UPI payments and INR pricing from day one."],
+            ["Made for everyone", "Captions in any language, local currencies and payment methods worldwide."],
           ].map(([t, d]) => (
             <div key={t} className="rounded-2xl border border-line bg-canvas p-5">
               <p className="text-base font-semibold text-ink">{t}</p>

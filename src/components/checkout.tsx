@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Sparkles } from "lucide-react";
 import { btn } from "@/components/ui";
 import { call } from "@/lib/client-api";
+import type { Currency, PaidPlan } from "@/lib/types";
 
 type RazorpayResponse = { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
 type RazorpayCtor = new (opts: Record<string, unknown>) => { open: () => void; on: (ev: string, fn: () => void) => void };
@@ -21,8 +22,8 @@ function loadRazorpay(): Promise<RazorpayCtor | null> {
   });
 }
 
-/** Buy or renew Pro. Uses Razorpay Checkout when configured; otherwise a development switch. */
-export function CheckoutButton({ interval, label, autoStart, className }: { interval: "month" | "year"; label: string; autoStart?: boolean; className?: string }) {
+/** Buy, renew or switch a paid plan. Uses Razorpay Checkout when configured; otherwise a development switch. */
+export function CheckoutButton({ plan, interval, currency, label, autoStart, className, icon }: { plan: PaidPlan; interval: "month" | "year"; currency: Currency; label: string; autoStart?: boolean; className?: string; icon?: React.ReactNode }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +32,13 @@ export function CheckoutButton({ interval, label, autoStart, className }: { inte
   async function buy() {
     setBusy(true);
     setError(null);
-    const r = await call<{ dev?: boolean; orderId?: string; amount?: number; keyId?: string; name?: string; email?: string }>("/api/billing/checkout", "POST", { interval });
+    const r = await call<{ dev?: boolean; orderId?: string; amount?: number; currency?: Currency; keyId?: string; name?: string; email?: string }>("/api/billing/checkout", "POST", { plan, interval, currency });
     if (!r.ok) {
       setBusy(false);
       return setError(r.error);
     }
     if (r.data.dev) {
-      const d = await call("/api/account", "POST", { plan: "pro", interval });
+      const d = await call("/api/account", "POST", { plan, interval });
       setBusy(false);
       if (!d.ok) return setError(d.error);
       router.replace("/app/billing?welcome=1");
@@ -52,10 +53,10 @@ export function CheckoutButton({ interval, label, autoStart, className }: { inte
     const rzp = new Razorpay({
       key: r.data.keyId,
       amount: r.data.amount,
-      currency: "INR",
+      currency: r.data.currency ?? currency,
       order_id: r.data.orderId,
       name: "ReelMind",
-      description: interval === "year" ? "Pro · 1 year" : "Pro · 1 month",
+      description: `${plan === "premium" ? "Premium" : "Pro"} · ${interval === "year" ? "1 year" : "1 month"}`,
       prefill: { name: r.data.name, email: r.data.email },
       theme: { color: "#7c3aed" },
       handler: async (resp: RazorpayResponse) => {
@@ -81,7 +82,7 @@ export function CheckoutButton({ interval, label, autoStart, className }: { inte
   return (
     <div className="space-y-2">
       <button onClick={buy} disabled={busy} className={className ?? `${btn.brand} w-full py-3`}>
-        {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} {label}
+        {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : (icon ?? <Sparkles className="h-4 w-4" />)} {label}
       </button>
       {error && <p className="text-sm text-rose-600">{error}</p>}
     </div>

@@ -13,6 +13,6 @@ export async function POST(req: Request) {
   }
   const order = (await readDb()).payments.find((p) => p.ref === orderId && p.userId === user.id && p.provider === "razorpay");
   if (!order) return Response.json({ error: "Unknown order." }, { status: 404 });
-  if (order.status !== "paid") await activatePlan(user.id, "pro", order.interval, { provider: "razorpay", ref: orderId });
+  if (order.status !== "paid") await activatePlan(user.id, order.plan, order.interval, { provider: "razorpay", ref: orderId, currency: order.currency });
   return Response.json({ ok: true });
 }
